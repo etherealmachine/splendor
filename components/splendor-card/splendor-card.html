@@ -1,0 +1,128 @@
+<link
+    rel="import"
+    href="/bower_components/polymer/polymer.html">
+<link
+	  rel="import"
+	  href="/bower_components/paper-card/paper-card.html">
+<link
+    rel="import"
+    href="/bower_components/paper-ripple/paper-ripple.html">
+<link
+    rel="import"
+    href="/bower_components/paper-styles/color.html">
+<link
+    rel="import"
+    href="/behaviors/splendor-base-behavior.html">
+<link
+    rel="import"
+    href="/behaviors/splendor-selectable-behavior.html">
+<link 
+		rel="import"
+		href="/components/shared-styles/shared-styles.html">
+
+<dom-module id="splendor-card">
+  <template>
+
+    <style include="shared-styles"></style>
+    <style>
+      paper-card {
+        margin: 6px;
+        width: 200px;
+      }
+      .gem {
+        display: block;
+        width: 20px;
+        height: 20px;
+        border-radius: 20px;
+        line-height: 20px;
+        padding: 5px;
+        border: 1px solid black;
+        margin: 0 10px 10px 10px;
+        text-align: center;
+      }
+      .header .points {
+        float: left;
+      }
+      .header .gem {
+        float: right;
+      }
+      .cost .gem {
+        margin: 10px 5px 0 5px;
+      }
+      .card-content {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+      .cost {
+        display: flex;
+        flex-direction: row;
+      }
+    </style>
+
+    <paper-card
+        class$="[[classes(selected, 'selected', affordable, 'affordable')]]"
+        elevation="[[elevation(selected)]]"
+        on-tap="toggleSelected">
+      <div class="card-content">
+        <paper-ripple hidden$="[[!selectable]]"></paper-ripple>
+        <div class="header">
+          <span
+              class="points"
+              hidden$="[[!card.points]]">[[card.points]]</span>
+          <span
+              class$="[[classes('gem', card.gem)]]">
+          </span>
+        </div>
+        <div class="cost">
+          <span
+              hidden$="[[!card.diamond]]"
+              class="gem sm diamond">[[card.diamond]]</span>
+          <span
+              hidden$="[[!card.sapphire]]"
+              class="gem sm sapphire">[[card.sapphire]]</span>
+          <span
+              hidden$="[[!card.emerald]]"
+              class="gem sm emerald">[[card.emerald]]</span>
+          <span
+              hidden$="[[!card.ruby]]"
+              class="gem sm ruby">[[card.ruby]]</span>
+          <span
+              hidden$="[[!card.onyx]]"
+              class="gem sm onyx">[[card.onyx]]</span>
+        </div>
+      </div>
+    </paper-card>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'splendor-card',
+      behaviors: [SplendorBaseBehavior, SplendorSelectableBehavior],
+      properties: {
+        card: Object,
+        affordable: {
+          type: Boolean,
+          value: false
+        }
+      },
+      ready: function() {
+        Splendor.recv(function() {
+          var costs = 0;
+          Splendor.gems.forEach(function(gem) {
+            if (Splendor.game.player.chips[gem] < this.card[gem]) {
+              costs += this.card[gem] - Splendor.game.player.chips[gem];
+            }
+          }.bind(this));
+          if (costs <= Splendor.game.player.gold) {
+            this.set('affordable', true);
+          } else {
+            this.set('affordable', false);
+          }
+        }.bind(this));
+      }
+    });
+  </script>
+
+</dom-module>

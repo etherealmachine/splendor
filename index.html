@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Splendor</title>
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css?family=Roboto">
+		<style>
+			body {
+				font-family: 'Roboto', sans-serif;
+			}
+		</style>
+		<script
+			src="/bower_components/jquery/dist/jquery.min.js">
+		</script>
+		<script>
+			var cards;
+			$.ajax({
+			  type: 'GET',
+			  url: '/cards.csv',
+			  dataType: 'text',
+			  success: function(data) {
+			  	var lines = data.split('\n');
+			  	var cols = lines.shift().split(',');
+			  	cards = lines.map(function(line) {
+			  		return line.split(',');
+			  	}).map(function(row, index) {
+			  		var card = {
+			  			index: index
+			  		};
+			  		cols.forEach(function(col, i) {
+			  			var val = $.trim(row[i]);
+			  			if (val == '') {
+			  				val = 0;
+			  			} else {
+				  			var asInt = parseInt(val);
+				  			if (!isNaN(asInt)) {
+				  				val = asInt;
+				  			}
+				  		}
+				  		card[$.trim(col)] = val;
+			  		});
+			  		return card;
+			  	});
+			  }
+			});
+		</script>
+		<script
+			src="/bower_components/jquery-ui/jquery-ui.min.js">
+		</script>
+		<script
+			src="/lib/jquery-ui-touch.min.js">
+		</script>
+		<script
+			src="/bower_components/webcomponentsjs/webcomponents-lite.min.js">
+		</script>
+		<link
+			rel="import"
+			href="/style.html">
+		<link
+			rel="import"
+      href="/components/splendor-main/splendor-main.html">
+	</head>
+	<body class="fullbleed layout vertical">
+		<splendor-main></splendor-main>
+	</body>
+</html>

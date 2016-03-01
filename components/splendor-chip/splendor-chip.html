@@ -1,0 +1,67 @@
+<link
+    rel="import"
+    href="/bower_components/polymer/polymer.html">
+<link
+	  rel="import"
+	  href="/bower_components/paper-card/paper-material.html">
+<link
+    rel="import"
+    href="/bower_components/paper-ripple/paper-ripple.html">
+<link
+    rel="import"
+    href="/bower_components/paper-styles/color.html">
+<link
+    rel="import"
+    href="/behaviors/splendor-base-behavior.html">
+<link
+    rel="import"
+    href="/behaviors/splendor-selectable-behavior.html">
+<link 
+		rel="import"
+		href="/components/shared-styles/shared-styles.html">
+
+<dom-module id="splendor-chip">
+  <template>
+
+    <style include="shared-styles"></style>
+    <style>
+      paper-material {
+        display: block;
+        position: relative;
+        width: 80px;
+        height: 80px;
+        border-radius: 80px;
+        border: 1px solid var(--paper-black);
+        line-height: 80px;
+        margin: 10px;
+        text-align: center;
+      }
+    </style>
+
+    <paper-material
+    		class$="[[classes(gem, selected, 'selected')]]"
+        elevation="[[elevation(selected)]]"
+    		on-tap="toggleSelected">
+      <paper-ripple hidden$="[[!selectable]]"></paper-ripple>
+    	<span>[[count]]</span>
+    </paper-card>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'splendor-chip',
+      behaviors: [SplendorBaseBehavior, SplendorSelectableBehavior],
+      properties: {
+        gem: String,
+        count: Number,
+      },
+      ready: function() {
+        if (this.gem == 'gold') {
+          this.set('selectable', false);
+        }
+      }
+    });
+  </script>
+
+</dom-module>

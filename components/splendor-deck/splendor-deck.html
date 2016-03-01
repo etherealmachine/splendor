@@ -1,0 +1,67 @@
+<link
+    rel="import"
+    href="/bower_components/polymer/polymer.html">
+<link
+	  rel="import"
+	  href="/bower_components/paper-card/paper-card.html">
+<link
+    rel="import"
+    href="/bower_components/paper-ripple/paper-ripple.html">
+<link
+    rel="import"
+    href="/behaviors/splendor-base-behavior.html">
+<link
+    rel="import"
+    href="/behaviors/splendor-selectable-behavior.html">
+<link 
+    rel="import"
+    href="/components/shared-styles/shared-styles.html">
+
+<dom-module id="splendor-deck">
+
+  <template>
+
+    <style include="shared-styles"></style>
+    <style>
+    	paper-card {
+        margin: 6px;
+        width: 80px;
+    		height: 116px;
+    	}
+    	.card-content {
+        position: relative;
+    		display: flex;
+    		justify-content: center;
+    		padding: 0;
+    	}
+    	.card-content span {
+    		line-height: 116px;
+    	}
+    </style>
+
+    <paper-card
+        class$="[[classes(selected, 'selected')]]"
+        elevation="[[elevation(selected)]]"
+        on-tap="toggleSelected">
+    	<div class="card-content">
+        <paper-ripple></paper-ripple>
+		    <span>[[deck.length]]</span>
+    	</div>
+    </paper-card>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'splendor-deck',
+      behaviors: [SplendorBaseBehavior, SplendorSelectableBehavior],
+      properties: {
+        deck: Array,
+        selectable: {
+          type: Boolean,
+          value: true
+        }
+      }
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,19 @@
+{
+  "name": "splendor",
+  "version": "0.0.1",
+  "description": "Implementation of the board game Splendor.",
+  "author": "James Pettit <etherealmachine@gmail.com>",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/etherealmachine/splendor"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-vulcanize": "^6.0.1",
+		"gulp-webserver": "^0.9.1"
+  }
+}
