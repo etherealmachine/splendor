@@ -26,7 +26,7 @@
     	paper-card {
         margin: 6px;
         width: 80px;
-    		height: 116px;
+    		height: 40px;
     	}
     	.card-content {
         position: relative;
@@ -35,14 +35,14 @@
     		padding: 0;
     	}
     	.card-content span {
-    		line-height: 116px;
+    		line-height: 40px;
     	}
     </style>
 
     <paper-card
         class$="[[classes(selected, 'selected')]]"
         elevation="[[elevation(selected)]]"
-        on-tap="toggleSelected">
+        on-tap="_toggleSelected">
     	<div class="card-content">
         <paper-ripple></paper-ripple>
 		    <span>[[deck.length]]</span>
@@ -60,6 +60,12 @@
         selectable: {
           type: Boolean,
           value: true
+        }
+      },
+      _toggleSelected: function() {
+        if (Splendor.game.player.reserved.length < 3 &&
+            this.deck.length > 0) {
+          this.toggleSelected();
         }
       }
     });

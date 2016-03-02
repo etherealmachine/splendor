@@ -13,38 +13,6 @@
 		<script
 			src="/bower_components/jquery/dist/jquery.min.js">
 		</script>
-		<script>
-			var cards;
-			$.ajax({
-			  type: 'GET',
-			  url: '/cards.csv',
-			  dataType: 'text',
-			  success: function(data) {
-			  	var lines = data.split('\n');
-			  	var cols = lines.shift().split(',');
-			  	cards = lines.map(function(line) {
-			  		return line.split(',');
-			  	}).map(function(row, index) {
-			  		var card = {
-			  			index: index
-			  		};
-			  		cols.forEach(function(col, i) {
-			  			var val = $.trim(row[i]);
-			  			if (val == '') {
-			  				val = 0;
-			  			} else {
-				  			var asInt = parseInt(val);
-				  			if (!isNaN(asInt)) {
-				  				val = asInt;
-				  			}
-				  		}
-				  		card[$.trim(col)] = val;
-			  		});
-			  		return card;
-			  	});
-			  }
-			});
-		</script>
 		<script
 			src="/bower_components/jquery-ui/jquery-ui.min.js">
 		</script>

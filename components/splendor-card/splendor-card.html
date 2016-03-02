@@ -27,52 +27,69 @@
     <style>
       paper-card {
         margin: 6px;
-        width: 200px;
+        width: 220px;
       }
       .gem {
         display: block;
-        width: 20px;
-        height: 20px;
-        border-radius: 20px;
-        line-height: 20px;
-        padding: 5px;
+        width: 30px;
+        height: 30px;
+        border-radius: 30px;
+        line-height: 30px;
+        padding: 0;
+        margin: 5px 2px 5px 2px;
         border: 1px solid black;
-        margin: 0 10px 10px 10px;
         text-align: center;
       }
-      .header .points {
-        float: left;
-      }
-      .header .gem {
-        float: right;
-      }
-      .cost .gem {
-        margin: 10px 5px 0 5px;
+      .points {
+        line-height: 40px;
+        width: 9px;
+        margin: 0 4px 0 4px;
       }
       .card-content {
         display: flex;
-        flex-direction: column;
-        position: relative;
+        flex-direction: row;
+        padding: 0;
+      }
+      .affordable::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        box-shadow: inset 0px 0px 0px 2px var(--paper-green-200);
+      }
+      .bonus {
+        border-right: 2px solid var(--paper-grey-300);
+        display: flex;
+        flex-direction: row;
+        line-height: 40px;
+        padding: 0 5px 0 5px;
       }
       .cost {
         display: flex;
         flex-direction: row;
+        margin-left: 5px;
       }
     </style>
 
     <paper-card
         class$="[[classes(selected, 'selected', affordable, 'affordable')]]"
         elevation="[[elevation(selected)]]"
-        on-tap="toggleSelected">
+        on-tap="_toggleSelected">
       <div class="card-content">
-        <paper-ripple hidden$="[[!selectable]]"></paper-ripple>
-        <div class="header">
+        <paper-ripple
+          hidden$="[[!_canSelect(selectable, reservable, affordable)]]">
+        </paper-ripple>
+        <div class="bonus">
           <span
               class="points"
               hidden$="[[!card.points]]">[[card.points]]</span>
           <span
-              class$="[[classes('gem', card.gem)]]">
-          </span>
+              class="points"
+              hidden="[[card.points]]"></span>
+          <span
+              class$="[[classes('gem', card.gem)]]"></span>
         </div>
         <div class="cost">
           <span
@@ -105,22 +122,33 @@
         affordable: {
           type: Boolean,
           value: false
+        },
+        reservable: {
+          type: Boolean,
+          value: false
         }
       },
       ready: function() {
-        Splendor.recv(function() {
-          var costs = 0;
-          Splendor.gems.forEach(function(gem) {
-            if (Splendor.game.player.chips[gem] < this.card[gem]) {
-              costs += this.card[gem] - Splendor.game.player.chips[gem];
-            }
-          }.bind(this));
-          if (costs <= Splendor.game.player.gold) {
+        Splendor.recv(function(event) {
+          if (Splendor.game.player.payment(this.card) != null) {
             this.set('affordable', true);
           } else {
             this.set('affordable', false);
           }
+          if (event && event.type == 'reserveMode') {
+            this.set('reservable', event.data);
+          }
         }.bind(this));
+      },
+      _toggleSelected: function() {
+        if (this._canSelect(this.selectable,
+                            this.reservable,
+                            this.affordable)) {
+          this.toggleSelected();
+        }
+      },
+      _canSelect: function(selectable, reservable, affordable) {
+        return selectable && (reservable || affordable);
       }
     });
   </script>
