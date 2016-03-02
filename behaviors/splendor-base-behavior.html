@@ -8,11 +8,11 @@
 			});
 		},
 		classes: function() {
-			arguments = Array.prototype.slice.call(arguments);
+			args = Array.prototype.slice.call(arguments);
 			var classes = [];
 			var conditional = false;
 			var condition = false;
-			arguments.forEach(function(arg) {
+			args.forEach(function(arg) {
 				if (typeof(arg) == 'boolean') {
 					conditional = true;
 					condition = arg;

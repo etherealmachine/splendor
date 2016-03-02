@@ -19,5 +19,6 @@ gulp.task('vulcanize', function() {
       inlineCss: true,
       inputUrl: '../../../../index.html'
     }))
+    .on('error', function(err) { console.log( err ); })
     .pipe(gulp.dest('dist'));
 });
