@@ -3,7 +3,7 @@ import json
 
 with open('cards.csv') as f:
 	r = csv.DictReader(f)
-	cards = [row for row in r]
+	items = [row for row in r]
 
 gems = [
 	'diamond',
@@ -13,13 +13,17 @@ gems = [
 	'onyx'
 ]
 
-for card in cards:
-	for gem in gems:
-		if card[gem] == '':
-			card[gem] = 0
-		else:
-			card[gem] = int(card[gem])
-	card['points'] = int(card['points'])
-	card['level'] = int(card['level'])
+cards = []
+for item in items:
+	card = {
+		'cost': [0, 0, 0, 0, 0],
+		'gem': item['gem'],
+		'points': int(item['points']),
+		'level': int(item['level'])
+	}
+	for i, gem in enumerate(gems):
+		if item[gem] != '':
+			card['cost'][i] = int(item[gem])
+	cards.append(card)
 
 print 'window.Splendor = window.Splendor || {cards: %s};' % (json.dumps(cards),)

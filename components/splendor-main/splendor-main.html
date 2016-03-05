@@ -3,6 +3,9 @@
     href="/bower_components/polymer/polymer.html">
 <link
     rel="import"
+    href="/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link
+    rel="import"
     href="/bower_components/iron-icons/iron-icons.html">
 <link
     rel="import"
@@ -19,6 +22,9 @@
 <link
     rel="import"
     href="/bower_components/paper-button/paper-button.html">
+<link
+    rel="import"
+    href="/bower_components/paper-material/paper-material.html">
 <link
     rel="import"
     href="/behaviors/splendor-base-behavior.html">
@@ -42,6 +48,7 @@
 
   <template>
 
+    <style include="iron-flex iron-flex-alignment"></style>
     <style include="shared-styles"></style>
     <style>
       .title {
@@ -90,6 +97,12 @@
         position: absolute;
         bottom: 0;
         right: 0;
+      }
+      splendor-chip {
+        --splendor-chip-size: 60px;
+      }
+      .opponent splendor-chip {
+        --splendor-chip-size: 40px;
       }
       paper-checkbox {
         margin-right: 10px;
@@ -171,7 +184,8 @@
 
     <div class="player">
 
-      <div class="tableau">
+      <paper-material class="tableau">
+        <h4>Purchased</h4>
         <template
             is="dom-repeat"
             items="[[game.player.tableau]]"
@@ -180,9 +194,10 @@
               card="[[card]]">
           </splendor-card>
         </template>
-      </div>
+      </paper-material>
 
-      <div class="reserved">
+      <paper-material class="reserved">
+        <h4>Reserved</h4>
         <template
             is="dom-repeat"
             items="[[game.player.reserved]]"
@@ -192,14 +207,33 @@
               selectable>
           </splendor-card>
         </template>
-      </div>
+      </paper-material>
 
+    </div>
+
+    <div class="opponent layout vertical">
+      <template is="dom-repeat" items="[[game.opponents]]" as="player">
+        <paper-material class="layout vertical">
+          <h4>[[player.name]]</h4>
+          <div class="layout horizontal">
+            <template
+                is="dom-repeat"
+                items="[[pairs(player.chips, player.chips.*)]]"
+                as="chip">
+              <splendor-chip
+                  gem="[[chip.key]]"
+                  count="[[chip.value]]"></splendor-chip>
+            </template>
+          </div>
+        </paper-material>
+      </template>
     </div>
 
   </template>
 
   <script src="/lib/splendor-cards.js"></script>
   <script src="/lib/splendor.js"></script>
+  <script src="/lib/splendor-ai.js"></script>
   <script>
     Polymer({
       is: 'splendor-main',
@@ -266,7 +300,7 @@
               // purchase card
 
               // assert the player can afford the card
-              var payment = this.game.player.payment(card);
+              var payment = this.game.player.payment(card.cost);
               if (payment == null) {
                 console.error('trying to purchase unaffordable card');s
                 return;
@@ -354,6 +388,26 @@
         selected = [];
         this.set('reserve', false);
         Splendor.send();
+        var chipTuple = new Tuple(
+          this.game.chips.diamond,
+          this.game.chips.sapphire,
+          this.game.chips.emerald,
+          this.game.chips.ruby,
+          this.game.chips.onyx
+        );
+        var draws = LegalChipDraws(chipTuple);
+        var draw = draws[Math.floor(Math.random()*draws.length)];
+        draw.forEach(function(count, i) {
+          if (count > 0) {
+            var gem = gems[i];
+            this.set(
+              'game.opponents.0.chips.'+gem,
+              this.game.opponents[0].chips[gem]+count);
+            this.set(
+              'game.chips.'+gem,
+              this.game.chips[gem]-count);
+          }
+        }.bind(this));
       }
     });
   </script>

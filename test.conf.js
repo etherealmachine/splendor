@@ -18,8 +18,10 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'bower_components/tuple/tuple.js',
       'lib/splendor-cards.js',
       'lib/splendor.js',
+      'lib/splendor-ai.js',
       'tests/*.js'
     ],
 

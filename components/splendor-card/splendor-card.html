@@ -93,20 +93,20 @@
         </div>
         <div class="cost">
           <span
-              hidden$="[[!card.diamond]]"
-              class="gem sm diamond">[[card.diamond]]</span>
+              hidden$="[[!card.cost.0]]"
+              class="gem sm diamond">[[card.cost.0]]</span>
           <span
-              hidden$="[[!card.sapphire]]"
-              class="gem sm sapphire">[[card.sapphire]]</span>
+              hidden$="[[!card.cost.1]]"
+              class="gem sm sapphire">[[card.cost.1]]</span>
           <span
-              hidden$="[[!card.emerald]]"
-              class="gem sm emerald">[[card.emerald]]</span>
+              hidden$="[[!card.cost.2]]"
+              class="gem sm emerald">[[card.cost.2]]</span>
           <span
-              hidden$="[[!card.ruby]]"
-              class="gem sm ruby">[[card.ruby]]</span>
+              hidden$="[[!card.cost.3]]"
+              class="gem sm ruby">[[card.cost.3]]</span>
           <span
-              hidden$="[[!card.onyx]]"
-              class="gem sm onyx">[[card.onyx]]</span>
+              hidden$="[[!card.cost.4]]"
+              class="gem sm onyx">[[card.cost.4]]</span>
         </div>
       </div>
     </paper-card>
@@ -130,7 +130,7 @@
       },
       ready: function() {
         Splendor.recv(function(event) {
-          if (Splendor.game.player.payment(this.card) != null) {
+          if (Splendor.game.player.payment(this.card.cost) != null) {
             this.set('affordable', true);
           } else {
             this.set('affordable', false);
