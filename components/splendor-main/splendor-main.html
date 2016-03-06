@@ -235,6 +235,27 @@
   <script src="/lib/splendor.js"></script>
   <script src="/lib/splendor-ai.js"></script>
   <script>
+    function observe(target, listener, path) {
+      Object.getOwnPropertyNames(target).forEach(function(prop) {
+        var tmp = target[prop];
+        if (typeof tmp == 'object') {
+          target[prop] = new Proxy(
+            target[prop],
+            observer(listener, path + '.' + prop));
+          observe(tmp, listener, path + '.' + prop);
+        }
+      });
+      return target;
+    }
+    var observer = function(listener, path) {
+      return {
+        set: function(target, prop, value, receiver) {
+          Reflect.set(target, prop, value);
+          listener.notifyPath(path + '.' + prop, value);
+          return true;
+        }
+      };
+    };
     Polymer({
       is: 'splendor-main',
       behaviors: [SplendorBaseBehavior],
@@ -242,7 +263,10 @@
         game: {
           type: Object,
           value: function() {
-            Splendor.game = Splendor.game || new Splendor.Game(2);
+            Splendor.game = Splendor.game || observe(
+              new Splendor.Game(2),
+              this,
+              'game');
             return Splendor.game;
           }
         },
@@ -272,122 +296,32 @@
             var card = selection.card;
             if (this.reserve) {
               // reserve card
-
-              // assert the player cannot have more than 3 reserved cards
-              if (this.game.player.reserved.length >= 3) {
-                console.error('trying to reserve more than three cards');
-                return;
-              }
-
-              // place the card in the player's reserved list
-              this.push('game.player.reserved', card);
-
-              // remove and replace the card from the level
-              var level = this.game.levels[card.level-1];
-              var levelPath = 'game.levels.'+(card.level-1);
-              var drawn = this.shift(levelPath+'.draw');
-              this.splice(
-                levelPath+'.cards',
-                level.cards.indexOf(card), 1,
-                drawn);
-
-              // give the player 1 gold
-              this.set('game.chips.gold', this.game.chips.gold-1);
-              this.set('game.player.chips.gold',
-                       this.game.player.chips.gold+1);
-
+              this.game.reserve(card);
             } else {
               // purchase card
-
-              // assert the player can afford the card
-              var payment = this.game.player.payment(card.cost);
-              if (payment == null) {
-                console.error('trying to purchase unaffordable card');s
-                return;
-              }
-              // pay for the card
-              for (var gem in payment) {
-                var cost = payment[gem];
-                this.set('game.player.chips.'+gem,
-                         this.game.player.chips[gem]-cost);
-                this.set('game.chips.'+gem,
-                         this.game.chips[gem]+cost);
-              }
-              // place the card in the player's tableau
-              this.push('game.player.tableau', card);
-              if (this.game.player.reserved.indexOf(card) != -1) {
-                // remove the card from the player's reserved list
-                this.splice(
-                  'game.player.reserved',
-                  this.game.player.reserved.indexOf(card),
-                  1);
-              } else {
-                // remove and replace the card from the level
-                var level = this.game.levels[card.level-1];
-                var levelPath = 'game.levels.'+(card.level-1);
-                var drawn = this.shift(levelPath+'.draw');
-                this.splice(
-                  levelPath+'.cards',
-                  level.cards.indexOf(card), 1,
-                  drawn);
-              }
+              this.game.purchase(card);
             }
           } else if (selected[0].tagName == 'SPLENDOR-DECK') {
             // reserve a card at random
-
-            // assert the player cannot have more than 3 reserved cards
-            if (this.game.player.reserved.length >= 3) {
-              console.error('trying to reserve more than three cards');
-              return;
-            }
-            var levelIndex = selected[0].deck[0].level-1;
-            var level = this.game.levels[levelIndex];
-            // assert the deck has cards left
-            if (level.draw.length <= 0) {
-              console.error('trying to reserve from empty deck');
-              return;
-            }
-            var levelPath = 'game.levels.'+levelIndex;
-            // draw a card and transfer it to the player's reserved list
-            var drawn = this.shift(levelPath+'.draw');
-            this.push('game.player.reserved', drawn);
-            // give the player 1 gold
-            this.set('game.chips.gold', this.game.chips.gold-1);
-            this.set('game.player.chips.gold',
-                     this.game.player.chips.gold+1);
+            var level = selected[0].deck[0].level-1;
+            this.game.reserveRandom(level)
           }
         } else {
-          // draw chips
-
-          var sum = 0;
-          for (var gem in this.game.player.chips) {
-            sum += this.game.player.chips[gem];
-          }
-
-          selected.forEach(function(element) {
-            var gem = element.gem;
-            var count = 1;
-            if (this.game.chips[gem] >= 4 && selected.length == 1) {
-              count = 2;
-            }
-            sum += count;
-            if (sum > 10) {
-              return;
-            }
-            this.set(
-              'game.player.chips.'+gem,
-              this.game.player.chips[gem]+count);
-            this.set(
-              'game.chips.'+gem,
-              this.game.chips[gem]-count);
-          }.bind(this));
+          // take chips
+          this.game.take(selected.map(function(element) {
+            return element.gem;
+          }));
         }
+        // clear selection
         selected.forEach(function(element) {
           element.set('selected', false);
         });
         selected = [];
+        // clear reserve bit
         this.set('reserve', false);
-        Splendor.send();
+
+        // ai
+        /*
         var chipTuple = new Tuple(
           this.game.chips.diamond,
           this.game.chips.sapphire,
@@ -408,6 +342,7 @@
               this.game.chips[gem]-count);
           }
         }.bind(this));
+        */
       }
     });
   </script>
