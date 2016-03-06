@@ -247,12 +247,61 @@
       });
       return target;
     }
+    var captured = null;
     var observer = function(listener, path) {
       return {
         set: function(target, prop, value, receiver) {
           Reflect.set(target, prop, value);
           listener.notifyPath(path + '.' + prop, value);
           return true;
+        },
+        get: function(target, prop, receiver) {
+          if (prop == 'push') {
+            return function(item) {
+              target.push(item);
+              listener.notifySplices(path, [
+                {
+                  index: (target.length-1),
+                  removed: [],
+                  addedCount: 1,
+                  object: target,
+                  type: 'splice'
+                }
+              ]);
+            }
+          } else if (prop == 'pop') {
+            console.error('unhandled polymer array mutation');
+          } else if (prop == 'splice') {
+            return function(start, deleteCount) {
+              var removed = target.splice.apply(target, arguments);
+              listener.notifySplices(path, [
+                {
+                  index: start,
+                  removed: removed,
+                  addedCount: arguments.length-2,
+                  object: target,
+                  type: 'splice'
+                }
+              ]);
+            }
+          } else if (prop == 'shift') {
+            return function() {
+              var item = target.shift();
+              listener.notifySplices(path, [
+                {
+                  index: 0,
+                  removed: [item],
+                  addedCount: 0,
+                  object: target,
+                  type: 'splice'
+                }
+              ]);
+              return item;
+            }
+          } else if (prop == 'unshift') {
+              console.error('unhandled polymer array mutation');
+          }
+          return Reflect.get(target, prop, receiver);
         }
       };
     };
@@ -296,21 +345,25 @@
             var card = selection.card;
             if (this.reserve) {
               // reserve card
-              this.game.reserve(card);
+              this.game.reserve(this.game.player, card);
             } else {
               // purchase card
-              this.game.purchase(card);
+              this.game.purchase(this.game.player, card);
             }
           } else if (selected[0].tagName == 'SPLENDOR-DECK') {
             // reserve a card at random
-            var level = selected[0].deck[0].level-1;
-            this.game.reserveRandom(level)
+            var level = this.game.levels.filter(function(level) {
+              return level.draw === selected[0].deck;
+            })[0];
+            this.game.reserveRandom(this.game.player, level);
           }
         } else {
           // take chips
-          this.game.take(selected.map(function(element) {
-            return element.gem;
-          }));
+          var gems = [];
+          for (var element of selected.values()) {
+            gems.push(element.gem);
+          }
+          this.game.take(this.game.player, gems);
         }
         // clear selection
         selected.forEach(function(element) {
@@ -319,30 +372,7 @@
         selected = [];
         // clear reserve bit
         this.set('reserve', false);
-
-        // ai
-        /*
-        var chipTuple = new Tuple(
-          this.game.chips.diamond,
-          this.game.chips.sapphire,
-          this.game.chips.emerald,
-          this.game.chips.ruby,
-          this.game.chips.onyx
-        );
-        var draws = LegalChipDraws(chipTuple);
-        var draw = draws[Math.floor(Math.random()*draws.length)];
-        draw.forEach(function(count, i) {
-          if (count > 0) {
-            var gem = gems[i];
-            this.set(
-              'game.opponents.0.chips.'+gem,
-              this.game.opponents[0].chips[gem]+count);
-            this.set(
-              'game.chips.'+gem,
-              this.game.chips[gem]-count);
-          }
-        }.bind(this));
-        */
+        Splendor.send();
       }
     });
   </script>

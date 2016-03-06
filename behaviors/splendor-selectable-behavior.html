@@ -1,6 +1,5 @@
-<script src="/lib/set.js"></script>
 <script>
-  var selected = [];
+  var selected = new Set();
 	SplendorSelectableBehavior = {
 		properties: {
       selectable: {
@@ -16,6 +15,11 @@
       if (!this.selectable) {
         return;
       }
+      if (this.tagName == 'SPLENDOR-CHIP' &&
+          !this.selected &&
+          selected.size >= 3) {
+        return;
+      }
       this.set('selected', !this.selected);
       if (this.selected) {
         if (this.tagName == 'SPLENDOR-CARD' ||
@@ -23,22 +27,22 @@
           selected.forEach(function(element) {
             if (element.selected) {
               element.set('selected', false);
-              Set.remove(selected, element);
+              selected.delete(element);
             }
           });
         } else if (this.tagName == 'SPLENDOR-CHIP') {
           selected.forEach(function(element) {
             if (element.tagName != 'SPLENDOR-CHIP' && element.selected) {
               element.set('selected', false);
-              Set.remove(selected, element);
+              selected.delete(element);
             }
           });
         }
       }
       if (this.selected) {
-        Set.add(selected, this);
+        selected.add(this);
       } else {
-        Set.remove(selected, this);
+        selected.delete(this);
       }
     },
     elevation: function(selected) {
